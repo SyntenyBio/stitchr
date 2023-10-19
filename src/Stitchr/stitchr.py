@@ -496,7 +496,7 @@ def stitch(
             seamless = True
 
     # Get the germline encoded bits
-    n_term_nt_raw = done["l"] + done["v"]
+    n_term_nt_raw = done["v"]
     c_term_nt_raw = done["j"] + done["c"]
 
     # Run the appropriate form of non-templated integration
