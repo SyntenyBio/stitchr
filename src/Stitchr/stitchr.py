@@ -15,7 +15,7 @@ import warnings
 
 from . import stitchrfunctions as fxn
 
-__version__ = "1.1.2"
+__version__ = "1.1.2.syn"
 __author__ = "Jamie Heather"
 __email__ = "jheather@mgh.harvard.edu"
 
