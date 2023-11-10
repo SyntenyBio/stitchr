@@ -477,7 +477,8 @@ def stitch(
         )
 
     # Then determine whether CDR3 has been provided in amino or nucleic acid form
-    if fxn.dna_check(specific_args["cdr3"]):
+    aa_or_nt = specific_args.get("aa_or_nt")
+    if aa_or_nt == "NT":
         input_type = "nt"
         specific_args["cdr3_nt"] = specific_args["cdr3"]
         warnings.warn(
@@ -485,9 +486,20 @@ def stitch(
             + specific_args["cdr3_nt"]
             + "'. "
         )
-
-    else:
+    elif aa_or_nt == "AA":
         input_type = "aa"
+    else:
+        warnings.warn("Inferring whether a Nucleotide or AA sequence is provided for CDR3.")
+        if fxn.dna_check(specific_args["cdr3"]):
+            input_type = "nt"
+            specific_args["cdr3_nt"] = specific_args["cdr3"]
+            warnings.warn(
+                "CDR3 junction provided as DNA sequence: '"
+                + specific_args["cdr3_nt"]
+                + "'. "
+            )
+        else:
+            input_type = "aa"
 
     # Determine whether seamless integrated is requested (in platform independent way)
     seamless = False
