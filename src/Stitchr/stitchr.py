@@ -338,9 +338,7 @@ def stitch(
 
         # If no allele supplied (or is supplied but invalid) then use 1) a preferred allele or 2) the prototypical *01
         if not allele:
-            logger = logging.getLogger(__name__)
-            logger.setLevel(logging.INFO)
-            logger.warning(
+            logging.info(
                 "No valid "
                 + fxn.regions[r].lower()
                 + " region allele determined yet for "
