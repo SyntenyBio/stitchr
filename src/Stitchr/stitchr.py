@@ -338,7 +338,7 @@ def stitch(
 
         # If no allele supplied (or is supplied but invalid) then use 1) a preferred allele or 2) the prototypical *01
         if not allele:
-            warnings.warn(
+            logging.warning(
                 "No valid "
                 + fxn.regions[r].lower()
                 + " region allele determined yet for "
@@ -490,7 +490,9 @@ def stitch(
     elif aa_or_nt == "AA":
         input_type = "aa"
     else:
-        warnings.warn("Inferring whether a Nucleotide or AA sequence is provided for CDR3.")
+        warnings.warn(
+            "Inferring whether a Nucleotide or AA sequence is provided for CDR3."
+        )
         if fxn.dna_check(specific_args["cdr3"]):
             input_type = "nt"
             specific_args["cdr3_nt"] = specific_args["cdr3"]
