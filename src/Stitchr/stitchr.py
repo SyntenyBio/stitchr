@@ -339,7 +339,7 @@ def stitch(
 
         # If no allele supplied (or is supplied but invalid) then use 1) a preferred allele or 2) the prototypical *01
         if not allele:
-            logging.info(
+            logger.info(
                 "No valid "
                 + fxn.regions[r].lower()
                 + " region allele determined yet for "
@@ -403,7 +403,7 @@ def stitch(
                     for other_allele in tcr_info[fxn.regions[r]][gene]:
                         if other_allele != "01":
                             if not partial_info[gene][other_allele]:
-                                logger.warning(
+                                logger.info(
                                     "NB: the prototypical '*01' allele is being used for the "
                                     + fxn.regions[r].lower()
                                     + " region by default, but other alleles are "
