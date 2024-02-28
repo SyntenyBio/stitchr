@@ -12,7 +12,6 @@ Can be used for TCR vector design, and other purposes.
 import argparse
 import logging
 import sys
-import warnings
 
 from . import stitchrfunctions as fxn
 
@@ -21,7 +20,9 @@ __author__ = "Jamie Heather"
 __email__ = "jheather@mgh.harvard.edu"
 
 sys.tracebacklimit = 0  # comment when debugging
-warnings.formatwarning = fxn.custom_formatwarning
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def args():
@@ -289,7 +290,7 @@ def stitch(
 
                 # Check it's likely to translate in frame
                 if len(specific_args["l"]) % 3 != 0:
-                    warnings.warn(
+                    logger.warning(
                         "User specified leader sequence is not evenly divisible by 3 - "
                         "stitched TCR frame will likely be wrong. "
                     )
@@ -310,7 +311,7 @@ def stitch(
             # If an allele is provided, check whether it exists in the database for this gene and isn't partial
             if in_allele in tcr_info[fxn.regions[r]][gene]:
                 if partial_info[gene][allele]:
-                    warnings.warn(
+                    logger.warning(
                         "Cannot use "
                         + gene
                         + "*"
@@ -326,7 +327,7 @@ def stitch(
                     allele = in_allele
 
             else:
-                warnings.warn(
+                logger.warning(
                     "Cannot find the sequence of the requested allele, "
                     + gene
                     + "*"
@@ -350,7 +351,7 @@ def stitch(
             if preferences:
                 if gene in preferences[fxn.regions[r]]:
                     allele = preferences[fxn.regions[r]][gene]
-                    warnings.warn(
+                    logger.warning(
                         "Defaulting to allele *"
                         + allele
                         + " for the "
@@ -359,14 +360,14 @@ def stitch(
                     )
                     # NB: we don't have to worry about partial alleles in the preference list, as those are filtered out
                 else:
-                    warnings.warn(
+                    logger.warning(
                         "Defaulting to *01, as "
                         + gene
                         + " isn't specified in the preferred allele file for"
                         " the " + fxn.regions[r].lower() + " region. "
                     )
             else:
-                warnings.warn(
+                logger.warning(
                     "Defaulting to *01 for the " + fxn.regions[r].lower() + " region, "
                     "in the absence of a preferred allele file being specified. "
                 )
@@ -380,7 +381,7 @@ def stitch(
                         for x in tcr_info[fxn.regions[r]][gene]
                         if tcr_info[fxn.regions[r]][gene][x]
                     ][0]
-                    warnings.warn(
+                    logger.warning(
                         "No sequence found for "
                         + gene
                         + "*"
@@ -402,7 +403,7 @@ def stitch(
                     for other_allele in tcr_info[fxn.regions[r]][gene]:
                         if other_allele != "01":
                             if not partial_info[gene][other_allele]:
-                                warnings.warn(
+                                logger.warning(
                                     "NB: the prototypical '*01' allele is being used for the "
                                     + fxn.regions[r].lower()
                                     + " region by default, but other alleles are "
@@ -427,7 +428,7 @@ def stitch(
 
             # Check functionality
             if fxn.strip_functionality(functionality[gene][allele]) != "F":
-                warnings.warn(
+                logger.warning(
                     func_err_base + "and thus may not express or function correctly. "
                 )
 
@@ -448,7 +449,7 @@ def stitch(
                 # Otherwise, use the 01 terminal residue
                 else:
                     done[r] = done[r] + tcr_info[fxn.regions[r]][gene]["01"][-1]
-                    warnings.warn(
+                    logger.warning(
                         cdna_j_err
                         + "substituting the *01 allele terminal base to maintain reading frame. "
                     )
@@ -471,7 +472,7 @@ def stitch(
 
     # Throw a warning if the J gene is one in which the C-terminal residue cannot be confidently identified
     if used_alleles["j"] in low_confidence_js:
-        warnings.warn(
+        logger.warning(
             "Warning: "
             + used_alleles["j"]
             + " has a 'low confidence' CDR3-ending motif. "
@@ -482,7 +483,7 @@ def stitch(
     if aa_or_nt == "NT":
         input_type = "nt"
         specific_args["cdr3_nt"] = specific_args["cdr3"]
-        warnings.warn(
+        logger.warning(
             "CDR3 junction provided as DNA sequence: '"
             + specific_args["cdr3_nt"]
             + "'. "
@@ -490,13 +491,13 @@ def stitch(
     elif aa_or_nt == "AA":
         input_type = "aa"
     else:
-        warnings.warn(
+        logger.warning(
             "Inferring whether a Nucleotide or AA sequence is provided for CDR3."
         )
         if fxn.dna_check(specific_args["cdr3"]):
             input_type = "nt"
             specific_args["cdr3_nt"] = specific_args["cdr3"]
-            warnings.warn(
+            logger.warning(
                 "CDR3 junction provided as DNA sequence: '"
                 + specific_args["cdr3_nt"]
                 + "'. "
@@ -517,14 +518,14 @@ def stitch(
     # Run the appropriate form of non-templated integration
     # First test eligibility for seamless integration
     if input_type == "nt" and seamless:
-        warnings.warn(
+        logger.warning(
             "Seamless option selected: stitched sequence may not be accurate is nucleotide sequence provided is too "
             "short or contains polymorphisms or errors relative to the chosen genes/alleles near the edges. "
         )
 
         # Optimistic warning to ensure additional sequence provided for seamless stitching
         if fxn.translate_nt(specific_args["cdr3_nt"][:3]) == "C":
-            warnings.warn(
+            logger.warning(
                 "Cys residue detected in first codon of provided seamless CDR3 junction: "
                 "note that seamless stitching requires additional sequence 5' of the start of the CDR3 "
                 "(disregard this warning if this is not the CDR3 starting residue). "
@@ -536,7 +537,7 @@ def stitch(
 
         # Check for suspiciously short V gene overlaps
         if len(v_overlap) < 10:
-            warnings.warn(
+            logger.warning(
                 "Only short V gene overlap detected ("
                 + v_overlap
                 + ") for seamless stitching. "
@@ -549,7 +550,7 @@ def stitch(
             )
 
             if len(v_overlap_2) > 10:
-                warnings.warn(
+                logger.warning(
                     "A longer ("
                     + str(len(v_overlap_2))
                     + " nt) overlap was found after trimming the "
@@ -594,7 +595,7 @@ def stitch(
 
             # Frame check (if not providing extra context for seamless integration)
             if len(specific_args["cdr3_nt"]) % 3 != 0 and not seamless:
-                warnings.warn(
+                logger.warning(
                     "Warning: length of CDR3 DNA sequence provided is not evenly divisible by 3 "
                     "and seamless stitching not selected: stitched TCR frame will likely be wrong. "
                 )
@@ -627,7 +628,7 @@ def stitch(
             j_residues[used_alleles["j"]] = "F"
 
         if specific_args["cdr3"][-1] != j_residues[used_alleles["j"]]:
-            logging.warning(
+            logger.warning(
                 "CDR3 provided does not end with the expected residue for this J gene ("
                 + j_residues[used_alleles["j"]]
                 + "). Deletion this far in to the J is extremely unlikely. "

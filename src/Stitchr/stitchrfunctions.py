@@ -14,7 +14,6 @@ import os
 import re
 import sys
 import textwrap
-import warnings
 
 # Ensure correct importlib-resources function imported
 if sys.version_info < (3, 9):
@@ -35,13 +34,8 @@ linkers_file = str(data_files / "linkers.tsv")
 data_dir = os.path.dirname(additional_genes_file)
 gui_examples_dir = os.path.join(data_dir, "GUI-Examples")
 
-
-def custom_formatwarning(warning_msg, *args, **kwargs):
-    """
-    Function to make warnings.warn output just the warning text, not the underlying code
-    See https://stackoverflow.com/questions/2187269/print-only-the-message-on-warnings
-    """
-    return str(warning_msg) + "\n"
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def read_fa(ff):
@@ -196,7 +190,7 @@ def sort_input(cmd_line_args):
                 )
 
             if len(cmd_line_args[end + "_prime_seq"]) % 3 != 0:
-                warnings.warn(
+                logger.warning(
                     "Warning: length of "
                     + end
                     + "' sequence provided is not divisible by 3. "
@@ -456,19 +450,19 @@ def get_preferred_alleles(path_to_pa_file, gene_types, imgt_data, partiality, lo
 
                 # Check that provided preference is valid, present in the data, and not a partial gene
                 if pref_region not in regions.values():
-                    warnings.warn(base_warning + "as this is not a valid option. ")
+                    logger.warning(base_warning + "as this is not a valid option. ")
                 elif pref_gene not in imgt_data[pref_region]:
-                    warnings.warn(
+                    logger.warning(
                         base_warning
                         + "as this gene is not present in the input FASTA data for this species. "
                     )
                 elif pref_allele not in imgt_data[pref_region][pref_gene]:
-                    warnings.warn(
+                    logger.warning(
                         base_warning
                         + "as this allele is not present in the input FASTA data for this species. "
                     )
                 elif pref_allele in partiality[pref_gene][pref_allele]:
-                    warnings.warn(
+                    logger.warning(
                         base_warning
                         + "as the sequence for this allele is in the input data is flagged as partial. "
                     )
@@ -537,13 +531,13 @@ def tidy_c_term(c_term_nt, skip, c_region_motifs, c_gene):
 
             if f == 3:
                 if best == 2:
-                    warnings.warn(
+                    logger.warning(
                         "Note: expected reading frame "
                         + str(best)
                         + " used for translating C terminus. "
                     )
                 else:
-                    warnings.warn(
+                    logger.warning(
                         "Warning: reading frame "
                         + str(best)
                         + " used for translating C terminus, "
@@ -566,7 +560,7 @@ def tidy_c_term(c_term_nt, skip, c_region_motifs, c_gene):
                     translated = translate_nt(c_term_nt[f:])
 
                     if "UTR" not in c_region_motifs["exons"][c_gene]:
-                        warnings.warn(
+                        logger.warning(
                             "Warning: the constant region '"
                             + c_gene
                             + "' being used contains a stop codon, "
@@ -672,7 +666,7 @@ def determine_j_interface(
 
                 # Add a warning if the detected J match is too far or too shore
                 if cdr3_c_end > 22:
-                    warnings.warn(
+                    logger.warning(
                         "Warning: germline match '"
                         + c_term_cdr3_chunk
                         + "' was found "
@@ -761,7 +755,7 @@ def get_optimal_codons(specified_cu_file, species):
         path_to_cu_file = os.path.join(data_dir, "kazusa", species + ".txt")
 
     if not os.path.isfile(path_to_cu_file):
-        warnings.warn(
+        logger.warning(
             "Could not find a codon frequency file at this path: "
             + path_to_cu_file
             + ". Defaulting to the human table file."
@@ -770,7 +764,7 @@ def get_optimal_codons(specified_cu_file, species):
 
     codon_usage = get_codon_frequencies(path_to_cu_file)
     if len(codon_usage) < 20:
-        warnings.warn(
+        logger.warning(
             "Warning: incomplete codon usage file input - back translation may fail! "
         )
 
@@ -889,7 +883,7 @@ def get_linker_seq(linker_text, linker_dict):
     # Allows users to input their own custom DNA sequences
     elif dna_check(linker_text):
         if len(linker_text) % 3 != 0:
-            warnings.warn(
+            logger.warning(
                 "Warning: length of linker sequence '"
                 + linker_text
                 + "' is not divisible by 3; "
