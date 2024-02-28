@@ -9,6 +9,7 @@ Functions for stiTChR and its related scripts
 import collections as coll
 import datetime
 import gzip
+import logging
 import os
 import re
 import sys
@@ -681,7 +682,7 @@ def determine_j_interface(
                     )
 
                 if c <= j_warning_threshold:
-                    warnings.warn(
+                    logging.warning(
                         "Note: while a C-terminal CDR3:J germline match has been found, it was only the "
                         'string "' + c_term_cdr3_chunk + '". '
                     )
