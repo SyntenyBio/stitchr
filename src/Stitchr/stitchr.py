@@ -10,6 +10,7 @@ Can be used for TCR vector design, and other purposes.
 """
 
 import argparse
+import logging
 import sys
 import warnings
 
@@ -624,7 +625,7 @@ def stitch(
             j_residues[used_alleles["j"]] = "F"
 
         if specific_args["cdr3"][-1] != j_residues[used_alleles["j"]]:
-            warnings.warn(
+            logging.warning(
                 "CDR3 provided does not end with the expected residue for this J gene ("
                 + j_residues[used_alleles["j"]]
                 + "). Deletion this far in to the J is extremely unlikely. "
