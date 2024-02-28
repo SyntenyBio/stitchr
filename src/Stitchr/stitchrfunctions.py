@@ -689,7 +689,7 @@ def determine_j_interface(
 
             # If no single match found using the non-strict conserved J motif pattern (G..|..G), use the strict GXG
             elif len(search) > 1 and len(c_term_cdr3_chunk) == 1:
-                warnings.warn(
+                logging.warning(
                     "Note: while a C-terminal CDR3:J germline match has been found, it was only the string "
                     '"' + c_term_cdr3_chunk + '", which occurs in two positions. '
                 )
